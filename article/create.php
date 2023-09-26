@@ -7,22 +7,20 @@ require_once $root_directory . "/helper/response.php";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     /* récupère et decode les valeurs envoyer dans le corps de la requête */
-    $data = json_decode(file_get_contents('php://input'), true);
+    $post = json_decode(file_get_contents('php://input'), true);
 
+    $data = [];
+    $data['title'] = $post['title'] ?? null;
+    $data['author'] = $post['author'] ?? null;
+    $data['description'] = $post['description'] ?? null;
+    $data['tags'] = $post['tags'] ?? null;
     $data['createdAt'] = (new DateTime())->format('Y-m-d H:i:s');
 
     $pdo = getPDOConnection();
 
     $keys = array_keys($data);
 
-    $sql = "INSERT INTO article (";
-    $sql .= implode(', ', $keys). ") VALUE (";
-    foreach($keys as $key) {
-        $sql .= ":".$key.", ";
-    }
-    $sql = substr($sql, 0, -2). ")";
-
-
+    $sql = "INSERT INTO article (`title`, `author`, `description`, `tags`, `createdAt`) VALUE (:title, :author, :description, :tags, :createdAt)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute($data);
 
